@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1575282182514
+Build-Jdk: 1.8.0_221
+Built-By: kelvin
+Bundle-Description: Module of SOFT-IoT plataform to fog gateway
+Bundle-ManifestVersion: 2
+Bundle-Name: SOFT-IoT-Fog-Gateway
+Bundle-SymbolicName: br.ufba.dcc.wiser.soft_iot.soft-iot-fog-gateway
+Bundle-Version: 1.0.0
+Created-By: Apache Maven Bundle Plugin
+Embed-Directory: target/dependency
+Embed-StripGroup: true
+Embed-Transitive: true
+Export-Package: br.ufba.dcc.wiser.soft_iot.fog_gateway;uses:="javax.xml.
+ bind,org.eclipse.paho.client.mqttv3.persist,org.eclipse.paho.client.mqt
+ tv3";version="1.0.0"
+Export-Service: br.ufba.dcc.wiser.soft_iot.fog_gateway.ControllerImpl
+Import-Package: javax.xml.bind;version="[2.1,3)",org.eclipse.paho.client
+ .mqttv3;version="[1.2,2)",org.eclipse.paho.client.mqttv3.persist;versio
+ n="[1.2,2)",org.osgi.service.blueprint;version="[1.0.0,2.0.0)"
+Tool: Bnd-1.50.0
