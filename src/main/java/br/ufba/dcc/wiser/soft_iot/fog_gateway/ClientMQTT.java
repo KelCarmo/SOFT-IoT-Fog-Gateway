@@ -16,7 +16,6 @@ public class ClientMQTT implements MqttCallbackExtended {
     private final String serverURI;
     private MqttClient client;
     private final MqttConnectOptions mqttOptions;
-    private int qtd_G_Connecteds = 0;
 
     public ClientMQTT(String serverURI, String usuario, String senha) {
         this.serverURI = serverURI;
@@ -53,14 +52,6 @@ public class ClientMQTT implements MqttCallbackExtended {
             return null;
         }
     }
-    
-    public void add_G_Connecteds() {
-    	this.qtd_G_Connecteds++;
-    }
-    
-    public int getQtdConnecteds() {
-    	return this.qtd_G_Connecteds;
-    }
 
     public void unsubscribe(String... topicos) {
         if (client == null || !client.isConnected() || topicos.length == 0) {
@@ -76,7 +67,7 @@ public class ClientMQTT implements MqttCallbackExtended {
     public void iniciar() {
         try {
             System.out.println("Conectando no broker MQTT em " + serverURI);
-            client = new MqttClient(serverURI, String.format("cliente_java_%d", System.currentTimeMillis()), new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
+            client = new MqttClient(serverURI, String.format("fog_gateway_%d", System.currentTimeMillis()), new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
             client.setCallback(this);
             client.connect(mqttOptions);
         } catch (MqttException ex) {

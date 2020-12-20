@@ -20,20 +20,29 @@ import java.util.Collections;
 import static java.util.Map.Entry.*;
 
 
-public class Listener implements IMqttMessageListener {
+public class ListenerTopK implements IMqttMessageListener {
 	
 	private boolean debugModeValue;
 	private ControllerImpl impl;
+	private ClientMQTT clienteMQTT_Up;
 	private ClientMQTT clienteMQTT_Host;
 	
-
-    public Listener(ControllerImpl impl, ClientMQTT clienteMQTT_Host, String topico, int qos) {
+	/**
+	 * 
+	 * @param impl
+	 * @param clienteMQTT_Up
+	 * @param clienteMQTT_Host
+	 * @param topico
+	 * @param qos
+	 */
+    public ListenerTopK(ControllerImpl impl, ClientMQTT clienteMQTT_Up, ClientMQTT clienteMQTT_Host, String topico, int qos) {
+        this.clienteMQTT_Up = clienteMQTT_Up;
         this.clienteMQTT_Host = clienteMQTT_Host;
-        this.clienteMQTT_Host.subscribe(qos, this, topico);
+        this.clienteMQTT_Up.subscribe(qos, this, topico);
         this.impl = impl;
     }
     
-    public Listener(ControllerImpl impl) {       
+    public ListenerTopK(ControllerImpl impl) {       
         this.impl = impl;
     }
     
@@ -41,6 +50,7 @@ public class Listener implements IMqttMessageListener {
     public synchronized void messageArrived( final String topic, final MqttMessage message) throws Exception {
     	
     	final String [] params = topic.split("/");
+    	final int k = Integer.valueOf(params[2]);
     	System.out.println("=========================================");
     	
         new Thread(new Runnable() {
@@ -48,12 +58,17 @@ public class Listener implements IMqttMessageListener {
 				String messageContent = new String(message.getPayload());
 				printlnDebug("topic: " + topic + "message: " + messageContent);
 				
-				if(params[0].equals("TOP_K_HEALTH_RES")) {
+				// Repassa a requisição vindo de um fog_gateway de cima para o broker local, com isso o bottom_broker terá conhecimento do cálculo.
+				if(params[0].equals("TOP_K_HEALTH")) {
 					byte[] b = messageContent.getBytes();
-					List<String> n = impl.topk_k_scoresByIdrequi.get(params[1]);
-					n.add(messageContent);
+					clienteMQTT_Host.publicar(topic, b, 1);
+					List<String> n = new ArrayList<String>();
 					impl.topk_k_scoresByIdrequi.put(params[1], n);
-					System.out.println("TOP-K RES REcebido: " + impl.topk_k_scoresByIdrequi.get(params[1]).toString());
+					
+					System.out.println("REQUI TOP-K REcebido: " + messageContent);
+					
+					// Inicia o processo de calcular o TOP_K
+					impl.calculateTopK(params[1], k);
 				}
 			}
 		}).start();
@@ -63,4 +78,5 @@ public class Listener implements IMqttMessageListener {
 		if (debugModeValue)
 			System.out.println(str);
 	}
+
 }
